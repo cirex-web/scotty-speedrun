@@ -9,11 +9,28 @@
   height: 600px;
 }
 .card__leftCol {
-  padding: 10px;
   border-right: 2px solid gray;
   display: flex;
   flex-direction: column;
   overflow: hidden;
+}
+.leftCol__logoContainer {
+  background-image: linear-gradient(
+    90deg,
+    hsl(152deg 52% 75%) 0%,
+    hsl(152deg 52% 76%) 8%,
+    hsl(152deg 52% 77%) 17%,
+    hsl(152deg 53% 78%) 25%,
+    hsl(152deg 53% 79%) 33%,
+    hsl(152deg 53% 80%) 42%,
+    hsl(152deg 53% 81%) 50%,
+    hsl(152deg 54% 82%) 58%,
+    hsl(152deg 54% 83%) 67%,
+    hsl(152deg 54% 84%) 75%,
+    hsl(152deg 55% 85%) 83%,
+    hsl(152deg 55% 86%) 92%,
+    hsl(152deg 55% 87%) 100%
+  );
 }
 .leftCol__logo {
   padding: 10px;
@@ -24,7 +41,8 @@
   padding: 10px;
 }
 .taskList {
-  padding-left: 10px;
+  padding: 10px 20px 10px 30px;
+
   overflow-y: auto;
   min-height: 0;
   flex-grow: 1;
@@ -67,8 +85,8 @@
     }
   }
 }
-.newTaskRow {
-  margin-bottom: 10px;
+.taskList__newTaskRow {
+  margin-bottom: 20px;
   display: flex;
   gap: 5px;
   position: sticky;

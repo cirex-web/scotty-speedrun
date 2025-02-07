@@ -186,14 +186,17 @@ export default function Home() {
   return (
     <div className={styles.card}>
       <div className={styles.card__leftCol}>
-        <Image
-          className={styles.leftCol__logo}
-          src="/logo.png"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
+        <div className={styles.leftCol__logoContainer}>
+          <Image
+            className={styles.leftCol__logo}
+            src="/logo.png"
+            alt="Next.js logo"
+            width={180}
+            height={38}
+            priority
+          />
+        </div>
+
         <ol className={styles.taskList}>
           {
             <p className={styles.taskList__edit_form_header}>
@@ -223,7 +226,7 @@ export default function Home() {
                 addNewTask(taskName, startDate, dueDate);
               }
             }}
-            className={styles.newTaskRow}
+            className={styles.taskList__newTaskRow}
             ref={formRef}
           >
             <input placeholder="New Task" name="taskName" required />
