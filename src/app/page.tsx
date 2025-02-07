@@ -44,43 +44,7 @@ interface ITask {
 interface ICompletedTask extends ITask {
   completionTime: number;
 }
-const originalTasks = [
-  {
-    title: "some task",
-    startTime: +new Date(),
-    dueTime: 1000 * 30 + +new Date(),
-    completionTime: undefined,
-    id: 1,
-  },
-  {
-    title: "completed task",
-    startTime: +new Date() - 1000 * 60,
-    dueTime: 1000 * 30 + +new Date(),
-    completionTime: +new Date(),
-    id: 2,
-  },
-  {
-    title: "completed task",
-    startTime: +new Date() - 1000 * 60,
-    dueTime: 1000 * 30 + +new Date(),
-    completionTime: +new Date(),
-    id: 3,
-  },
-  {
-    title: "completed task",
-    startTime: +new Date() - 1000 * 60,
-    dueTime: 1000 * 30 + +new Date(),
-    completionTime: +new Date(),
-    id: 4,
-  },
-  {
-    title: "some task",
-    startTime: +new Date(),
-    dueTime: 1000 * 30 + +new Date(),
-    completionTime: undefined,
-    id: 5,
-  },
-];
+
 function timestampToDatetimeInputString(timestampMs: number) {
   const date = new Date(timestampMs);
   date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
@@ -97,7 +61,7 @@ function TaskRow({
   deleteTask: (id: number) => void;
   editTask: (id: number) => void;
 }) {
-  const [rerender, setRerender] = useState(0);
+  const [, setRerender] = useState(0);
   const COLOR_RANGE_TIME_MS = 1000 * 60 * 60 * 24 * 5;
   useEffect(() => {
     setInterval(() => setRerender((render) => render + 1), 13);
