@@ -1,0 +1,85 @@
+.card {
+  font-family: var(--font-geist-sans);
+  margin: auto;
+  border-radius: 6px;
+  border: 2px solid gray;
+  display: grid;
+  grid-template-columns: 800px 1fr;
+  width: 1200px;
+  height: 600px;
+}
+.card__leftCol {
+  padding: 10px;
+  border-right: 2px solid gray;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.leftCol__logo {
+  padding: 10px;
+  height: 50px;
+  width: fit-content;
+}
+.card__rightCol {
+  padding: 10px;
+}
+.taskList {
+  padding-left: 10px;
+  overflow-y: auto;
+  min-height: 0;
+  flex-grow: 1;
+  position: relative;
+}
+.taskList__edit_form_header {
+  margin-bottom: 4px;
+  font-weight: bold;
+}
+.taskList__row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  &:hover {
+    & .taskList__row__inlineButton {
+      opacity: 1;
+    }
+  }
+}
+.taskList__row__completionTime {
+  margin-left: auto;
+  font-family: monospace;
+  font-size: 16px;
+}
+.taskList__row__inlineButton {
+  background-color: transparent;
+  font-size: inherit;
+  border: none;
+  margin: 0;
+  padding: 0;
+  line-height: 0;
+  cursor: pointer;
+  opacity: 0;
+
+  transition: 0.1s transform, 0.05s opacity;
+  &:hover {
+    transform: scale(1.13);
+    &:active {
+      transform: scale(1.05);
+    }
+  }
+}
+.newTaskRow {
+  margin-bottom: 10px;
+  display: flex;
+  gap: 5px;
+  position: sticky;
+  top: 0;
+  background: white;
+  & input {
+    font-size: 16px;
+  }
+}
+.bestTimesList {
+  & li {
+    font-size: 16px;
+  }
+}
