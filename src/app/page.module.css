@@ -7,39 +7,57 @@
   grid-template-columns: 800px 1fr;
   width: 1200px;
   height: 600px;
+  overflow: hidden;
 }
 .card__leftCol {
   border-right: 2px solid gray;
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-.leftCol__logoContainer {
   background-image: linear-gradient(
-    90deg,
-    hsl(152deg 52% 75%) 0%,
-    hsl(152deg 52% 76%) 8%,
-    hsl(152deg 52% 77%) 17%,
-    hsl(152deg 53% 78%) 25%,
-    hsl(152deg 53% 79%) 33%,
-    hsl(152deg 53% 80%) 42%,
-    hsl(152deg 53% 81%) 50%,
-    hsl(152deg 54% 82%) 58%,
-    hsl(152deg 54% 83%) 67%,
-    hsl(152deg 54% 84%) 75%,
-    hsl(152deg 55% 85%) 83%,
-    hsl(152deg 55% 86%) 92%,
-    hsl(152deg 55% 87%) 100%
+    125deg,
+    hsl(204deg 78% 80%) 0%,
+    hsl(204deg 78% 82%) 1%,
+    hsl(204deg 78% 84%) 2%,
+    hsl(204deg 78% 85%) 4%,
+    hsl(204deg 78% 87%) 5%,
+    hsl(205deg 78% 89%) 7%,
+    hsl(205deg 78% 90%) 9%,
+    hsl(205deg 78% 92%) 11%,
+    hsl(205deg 78% 94%) 14%,
+    hsl(205deg 78% 95%) 18%,
+    hsl(206deg 78% 97%) 22%,
+    hsl(206deg 78% 98%) 30%,
+    hsl(0deg 0% 100%) 49%
   );
 }
+.leftCol__logoContainer {
+  position: relative;
+  &::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -2px;
+    height: 2px;
+    background-color: gray;
+    mask-image: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 1),
+      rgba(0, 0, 0, 0.15),
+      rgba(0, 0, 0, 0)
+    );
+  }
+}
 .leftCol__logo {
-  padding: 10px;
-  height: 50px;
+  margin: 10px 30px;
+  height: 60px;
   width: fit-content;
 }
 .card__rightCol {
-  padding: 10px;
+  padding: 30px 20px;
 }
+
 .taskList {
   padding: 10px 20px 10px 30px;
 
@@ -51,6 +69,12 @@
 .taskList__edit_form_header {
   margin-bottom: 4px;
   font-weight: bold;
+}
+.taskList__sort_container {
+  font-size: 1rem;
+  margin-left: auto;
+  width: fit-content;
+  margin-bottom: 10px;
 }
 .taskList__row {
   display: flex;
@@ -91,7 +115,6 @@
   gap: 5px;
   position: sticky;
   top: 0;
-  background: white;
   & input {
     font-size: 16px;
   }
@@ -100,4 +123,12 @@
   & li {
     font-size: 16px;
   }
+}
+
+.footer {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  margin: 0 10px 10px 0;
+  color: gray;
 }

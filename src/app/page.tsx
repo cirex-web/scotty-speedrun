@@ -6,50 +6,11 @@ import { BsTrash3 } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
 import { useLocalStorage } from "react-use";
 import { getGreenRedColor } from "./color";
+import { getTimeString, timestampToDatetimeInputString } from "./time";
+import { ITask, SORT, ICompletedTask } from "./types";
+import { useTasks } from "./tasks";
+import { cmp } from "./sort";
 
-function getTimeString(durationMs: number) {
-  const ms = durationMs % 1000;
-  durationMs = Math.floor(durationMs / 1000);
-  const seconds = durationMs % 60;
-  durationMs = Math.floor(durationMs / 60);
-  const minutes = durationMs % 60;
-  durationMs = Math.floor(durationMs / 60);
-  const hours = durationMs % 24;
-  durationMs = Math.floor(durationMs / 24);
-  const days = durationMs;
-
-  const timeWithoutDays = (
-    <>
-      {String(hours).padStart(2, "0")}:{String(minutes).padStart(2, "0")}:
-      {String(seconds).padStart(2, "0")}
-      <span style={{ color: "gray" }}>:{String(ms).padStart(3, "0")}</span>
-    </>
-  );
-  if (days === 0) {
-    return timeWithoutDays;
-  }
-  return (
-    <>
-      {String(days)}:{timeWithoutDays}
-    </>
-  );
-}
-interface ITask {
-  title: string;
-  startTime: number;
-  dueTime: number;
-  completionTime: number | undefined;
-  id: number;
-}
-interface ICompletedTask extends ITask {
-  completionTime: number;
-}
-
-function timestampToDatetimeInputString(timestampMs: number) {
-  const date = new Date(timestampMs);
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toJSON().slice(0, -8);
-}
 function TaskRow({
   task,
   toggleTask,
@@ -107,43 +68,25 @@ function TaskRow({
     </li>
   );
 }
-
-export default function Home() {
+function useIsClient() {
   const [isClient, setIsClient] = useState(false);
-  const [tasks, setTasks] = useLocalStorage<ITask[]>("tasks", []);
+
   useEffect(() => {
     setIsClient(true);
   }, []);
+  return isClient;
+}
+export default function Home() {
+  const isClient = useIsClient();
   const formRef = useRef<HTMLFormElement>(null);
+  const [sortOrder, setSortOrder] = useLocalStorage<SORT>(
+    "sortOrder",
+    "START_DATE"
+  );
   const [taskIdBeingEdited, setTaskIdBeingEdited] = useState<number>();
-  if (!isClient || tasks === undefined) return;
+  const { tasks, addNewTask, updateTask, toggleTask, deleteTask } = useTasks();
+  if (!isClient || tasks === undefined || sortOrder === undefined) return;
 
-  const addNewTask = (taskName: string, startDate: Date, dueDate: Date) => {
-    setTasks([
-      ...tasks,
-      {
-        title: taskName,
-        startTime: +startDate,
-        dueTime: +dueDate,
-        id: Date.now() * 100 + Math.floor(Math.random() * 100),
-        completionTime: undefined,
-      },
-    ]);
-  };
-  const toggleTask = (taskId: number) => {
-    setTasks(
-      tasks.map((task) => {
-        if (task.id === taskId) {
-          return {
-            ...task,
-            completionTime:
-              task.completionTime === undefined ? +new Date() : undefined,
-          };
-        }
-        return task;
-      })
-    );
-  };
   const editTask = (taskId: number) => {
     if (!formRef.current) return;
     console.log(formRef.current);
@@ -161,38 +104,17 @@ export default function Home() {
     );
     setTaskIdBeingEdited(task.id);
   };
-  const updateTask = (
-    taskId: number,
-    taskName: string,
-    startDate: Date,
-    dueDate: Date
-  ) => {
-    setTasks(
-      tasks.map((task) => {
-        if (task.id !== taskId) return task;
-        return {
-          ...task,
-          title: taskName,
-          startTime: +startDate,
-          dueTime: +dueDate,
-        };
-      })
-    );
-    setTaskIdBeingEdited(undefined);
-  };
-  const deleteTask = (taskId: number) => {
-    setTasks(tasks.filter((task) => task.id !== taskId));
-  };
+
   return (
     <div className={styles.card}>
       <div className={styles.card__leftCol}>
         <div className={styles.leftCol__logoContainer}>
           <Image
             className={styles.leftCol__logo}
-            src="/logo.png"
-            alt="Next.js logo"
-            width={180}
-            height={38}
+            src="/logo2.png"
+            alt="Scotty Speedrun logo"
+            width={1000}
+            height={0}
             priority
           />
         </div>
@@ -222,6 +144,7 @@ export default function Home() {
               (e.target as HTMLFormElement).reset();
               if (taskIdBeingEdited !== undefined) {
                 updateTask(taskIdBeingEdited, taskName, startDate, dueDate);
+                setTaskIdBeingEdited(undefined);
               } else {
                 addNewTask(taskName, startDate, dueDate);
               }
@@ -235,17 +158,21 @@ export default function Home() {
             <button>+</button>
           </form>
           {!tasks.length && <p>No tasks yet! Add one above</p>}
+          <div className={styles.taskList__sort_container}>
+            <label htmlFor="sort">Sort by: </label>
+            <select
+              name="sort"
+              id="sort"
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as SORT)}
+            >
+              <option value="DUE_DATE">Due date</option>
+              <option value="START_DATE">Time elapsed</option>
+            </select>
+          </div>
+
           {tasks
-            .sort((taskA, taskB) => {
-              if (
-                taskB.completionTime !== undefined &&
-                taskA.completionTime !== undefined
-              )
-                return taskB.completionTime - taskA.completionTime;
-              if (taskA.completionTime !== undefined) return 1;
-              if (taskB.completionTime !== undefined) return -1;
-              return taskB.startTime - taskA.startTime;
-            })
+            .sort((a, b) => cmp(a, b, sortOrder))
             .map(
               (task) =>
                 task.id !== taskIdBeingEdited && (
@@ -286,7 +213,13 @@ export default function Home() {
             })}
         </ol>
       </div>
-      {/* <footer className={styles.footer}>Made by cirex</footer> */}
+      <footer className={styles.footer}>
+        Made by{" "}
+        <a href="https://github.com/cirex-web/scotty-speedrun" target="_blank">
+          cirex
+        </a>
+        . Logo shamelessly stolen from ScottyCon without permission
+      </footer>
     </div>
   );
 }
