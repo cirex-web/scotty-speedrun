@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import styles from "./page.module.css";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { BsTrash3 } from "react-icons/bs";
 import { FiEdit2 } from "react-icons/fi";
 import { useLocalStorage } from "react-use";
@@ -10,7 +10,25 @@ import { getTimeString, timestampToDatetimeInputString } from "./time";
 import { ITask, SORT, ICompletedTask } from "./types";
 import { useTasks } from "./tasks";
 import { cmp } from "./sort";
+function LiveTimeString({
+  timeTakenMs,
+  ...props
+}: { timeTakenMs: number } & React.ComponentPropsWithRef<"p">) {
+  const COLOR_RANGE_TIME_MS = 1000 * 60 * 60 * 24 * 5;
 
+  return (
+    <p
+      style={{
+        color: getGreenRedColor(
+          Math.max(0, 1 - timeTakenMs / COLOR_RANGE_TIME_MS)
+        ),
+      }}
+      {...props}
+    >
+      {getTimeString(timeTakenMs)}
+    </p>
+  );
+}
 function TaskRow({
   task,
   toggleTask,
@@ -23,26 +41,44 @@ function TaskRow({
   editTask: (id: number) => void;
 }) {
   const [, setRerender] = useState(0);
-  const COLOR_RANGE_TIME_MS = 1000 * 60 * 60 * 24 * 5;
-  useEffect(() => {
-    setInterval(() => setRerender((render) => render + 1), 13);
-  }, []);
+
   const timeTakenMs =
     task.completionTime !== undefined
       ? task.completionTime - task.startTime
       : +new Date() - task.startTime;
+  useEffect(() => {
+    if (task.completionTime === undefined) {
+      const intervalId = setInterval(
+        () => setRerender((render) => render + 1),
+        13
+      );
+      return () => clearInterval(intervalId);
+    }
+  }, [task.completionTime]);
+  const shouldDisplayCheckbox = timeTakenMs >= 0;
   return (
     <li key={task.id} className={styles.taskList__row}>
-      <input
-        type="checkbox"
-        id={`${task.id}`}
-        checked={task.completionTime !== undefined}
-        onChange={() => toggleTask(task.id)}
-      />
-      <label htmlFor={`${task.id}`}>
-        <h3>{task.title}</h3>
+      {useMemo(
+        () => (
+          <input
+            type="checkbox"
+            id={`${task.id}`}
+            checked={task.completionTime !== undefined}
+            onChange={() => toggleTask(task.id)}
+            disabled={!shouldDisplayCheckbox}
+            className={styles.taskList__row__checkbox}
+          />
+        ),
+        [shouldDisplayCheckbox, task, toggleTask]
+      )}
+      <label htmlFor={`${task.id}`} className={styles.taskList__row__taskName}>
+        <h3
+          style={{ fontWeight: task.completionTime === undefined ? "" : "400" }}
+        >
+          {task.title}
+        </h3>
       </label>
-      <p>
+      <p className={styles.taskList__row__dueDate}>
         (Due{" "}
         {new Date(task.dueTime).toLocaleDateString() +
           " " +
@@ -55,16 +91,11 @@ function TaskRow({
       <button className={styles.taskList__row__inlineButton}>
         <FiEdit2 onClick={() => editTask(task.id)} />
       </button>
-      <p
+
+      <LiveTimeString
+        timeTakenMs={timeTakenMs}
         className={styles.taskList__row__completionTime}
-        style={{
-          color: getGreenRedColor(
-            Math.max(0, 1 - timeTakenMs / COLOR_RANGE_TIME_MS)
-          ),
-        }}
-      >
-        {getTimeString(timeTakenMs)}
-      </p>
+      />
     </li>
   );
 }
@@ -83,9 +114,19 @@ export default function Home() {
     "sortOrder",
     "START_DATE"
   );
+  const [hideCompletedTasks, setHideCompletedTasks] = useLocalStorage<boolean>(
+    "hideCompletedTasks",
+    false
+  );
   const [taskIdBeingEdited, setTaskIdBeingEdited] = useState<number>();
   const { tasks, addNewTask, updateTask, toggleTask, deleteTask } = useTasks();
-  if (!isClient || tasks === undefined || sortOrder === undefined) return;
+  if (
+    !isClient ||
+    tasks === undefined ||
+    sortOrder === undefined ||
+    hideCompletedTasks === undefined
+  )
+    return;
 
   const editTask = (taskId: number) => {
     if (!formRef.current) return;
@@ -158,20 +199,36 @@ export default function Home() {
             <button>+</button>
           </form>
           {!tasks.length && <p>No tasks yet! Add one above</p>}
-          <div className={styles.taskList__sort_container}>
-            <label htmlFor="sort">Sort by: </label>
-            <select
-              name="sort"
-              id="sort"
-              value={sortOrder}
-              onChange={(e) => setSortOrder(e.target.value as SORT)}
-            >
-              <option value="DUE_DATE">Due date</option>
-              <option value="START_DATE">Time elapsed</option>
-            </select>
+          <div className={styles.taskList__settings_container}>
+            <div className={styles.settings_container__left}>
+              <input
+                type="checkbox"
+                checked={hideCompletedTasks}
+                onChange={(e) => setHideCompletedTasks(e.target.checked)}
+                id="showHiddenTasks"
+              />
+              <label htmlFor="showHiddenTasks">
+                <span> Hide completed tasks</span>
+              </label>
+            </div>
+            <div>
+              <label htmlFor="sort">Sort by: </label>
+              <select
+                name="sort"
+                id="sort"
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value as SORT)}
+              >
+                <option value="DUE_DATE">Due date</option>
+                <option value="START_DATE">Time elapsed</option>
+              </select>
+            </div>
           </div>
 
           {tasks
+            .filter(
+              (task) => !hideCompletedTasks || task.completionTime === undefined
+            )
             .sort((a, b) => cmp(a, b, sortOrder))
             .map(
               (task) =>

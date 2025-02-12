@@ -25,3 +25,7 @@ h3,
 p {
   margin: 0;
 }
+
+label {
+  cursor: pointer;
+}

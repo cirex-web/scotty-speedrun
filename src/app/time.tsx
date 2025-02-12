@@ -1,4 +1,11 @@
 export function getTimeString(durationMs: number) {
+  if (durationMs < 0) {
+    return (
+      <span style={{ color: "black" }}>
+        releases in {getTimeString(-durationMs)}
+      </span>
+    );
+  }
   const ms = durationMs % 1000;
   durationMs = Math.floor(durationMs / 1000);
   const seconds = durationMs % 60;
