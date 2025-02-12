@@ -198,7 +198,6 @@ export default function Home() {
             <input type="datetime-local" name="dueDate" />
             <button>+</button>
           </form>
-          {!tasks.length && <p>No tasks yet! Add one above</p>}
           <div className={styles.taskList__settings_container}>
             <div className={styles.settings_container__left}>
               <input
@@ -211,6 +210,8 @@ export default function Home() {
                 <span> Hide completed tasks</span>
               </label>
             </div>
+            {!tasks.length && <p>No tasks yet! Add one above</p>}
+
             <div>
               <label htmlFor="sort">Sort by: </label>
               <select
