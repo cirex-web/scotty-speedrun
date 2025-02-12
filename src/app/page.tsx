@@ -210,7 +210,6 @@ export default function Home() {
                 <span> Hide completed tasks</span>
               </label>
             </div>
-            {!tasks.length && <p>No tasks yet! Add one above</p>}
 
             <div>
               <label htmlFor="sort">Sort by: </label>
@@ -225,6 +224,7 @@ export default function Home() {
               </select>
             </div>
           </div>
+          {!tasks.length && <p>No tasks yet! Add one above</p>}
 
           {tasks
             .filter(
